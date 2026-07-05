@@ -1,7 +1,5 @@
 databases:
   - name: qa_postgres
-    databaseName: qa_db
-    user: postgres
     plan: free
 
 services:
