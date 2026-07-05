@@ -1,0 +1,52 @@
+databases:
+  - name: qa_postgres
+    databaseName: qa_db
+    user: postgres
+    plan: free
+
+services:
+  - type: redis
+    name: qa_redis
+    plan: free
+    ipAllowList: []
+
+  - type: web
+    name: qa_fastapi
+    env: python
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port 10000
+    envVars:
+      - key: POSTGRES_SERVER
+        fromDatabase:
+          name: qa_postgres
+          property: host
+      - key: POSTGRES_USER
+        fromDatabase:
+          name: qa_postgres
+          property: user
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: qa_postgres
+          property: password
+      - key: POSTGRES_DB
+        fromDatabase:
+          name: qa_postgres
+          property: database
+      - key: POSTGRES_PORT
+        fromDatabase:
+          name: qa_postgres
+          property: port
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: qa_redis
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ENABLE_VULNERABILITY_LAB
+        value: "false"
+      - key: FRONTEND_URL
+        value: "https://your-vercel-app-url.vercel.app" # To be updated by user

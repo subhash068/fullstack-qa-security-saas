@@ -1,0 +1,27 @@
+To stand out to recruiters, you should frame this project as a Dual-State Full-Stack Cybersecurity Training Platform & Test Lab. Explain it not just as a "web app," but as a professional engineering tool designed to teach and validate defensive security.
+
+Here is a guide on how to talk about this project in interviews, on your resume, and during networking.
+
+1. The Elevator Pitch (30-Second Summary)
+"I designed and built a production-grade web application that acts as a cybersecurity training lab. The platform is built using FastAPI, PostgreSQL, and Next.js 16 (Turbopack). What makes it unique is its dual-state architecture: it features isolated, intentionally vulnerable modules matching the OWASP Top 10 for security research, alongside fully patched, secure reference code for comparison. I also implemented a full STRIDE threat model, a 62-case manual QA test suite, and database-level PL/pgSQL triggers to log and redact audit trail logs automatically."
+
+2. Key Technical Talking Points
+🔹 Database Design & Auditing (3NF & PL/pgSQL)
+What to say: "I designed the PostgreSQL database to strict Third Normal Form (3NF). To optimize authentication lookups, I separated core credentials from user profiles into a 1:1 relationship. I also built a database-level audit system using PL/pgSQL triggers that log DML mutations (INSERT, UPDATE, DELETE) into an audit trail. For privacy and security compliance, the trigger automatically redacts password_hash values from the logs before they are written."
+🔹 Backend Architecture (FastAPI Service Layer)
+What to say: "On the backend, I used FastAPI and SQLAlchemy 2.0. I structured the application using the Service Layer and Repository Pattern to cleanly separate API routing from business logic. I wrote integration tests using Pytest running inside test-isolated transactions that roll back automatically to keep the test environment clean."
+🔹 Frontend & Route Middleware (Next.js 16 & TypeScript)
+What to say: "The frontend is a TypeScript Next.js 16 App Router application. I built custom navigation guards using Next.js Edge Middleware (proxy.ts). By reading cookie signatures on the server before rendering, the middleware restricts authenticated dashboard views and enforces role-based access control (RBAC), redirecting unauthorized users to a custom 403 page."
+3. Resume Bullet Point Templates
+Here are three bullet points you can copy-paste or adapt for your resume:
+
+Full-Stack Security Lab: Developed a dual-state cybersecurity training platform using FastAPI, PostgreSQL, and Next.js 16, incorporating isolated OWASP Top 10 vulnerabilities (SQLi, CSRF, IDOR, XSS) alongside secure reference code.
+Automated Database Auditing: Designed a 3NF PostgreSQL schema and authored PL/pgSQL database triggers to automatically capture row-level changes to an audit trail, implementing JSONB regex/key parsing to dynamically redact sensitive password hashes.
+Security & QA Telemetry: Formulated a STRIDE threat model and authored a comprehensive 62-case manual QA test suite spanning Smoke, Sanity, and boundary validations to verify API middleware, rate limiting, and route guards.
+4. Sample Interview Questions & How to Answer
+Q: Why did you separate the user table and the profile table in your database?
+Answer: "To conform to 3NF and optimize database performance. Authentication lookups happen on every request. By keeping the users table clean (only ID, email, password hash, and role), index lookups are extremely fast. Heavy profile details like bios, dates of birth, and avatar URLs are stored in a separate profiles table and only fetched when the user specifically visits their profile page."
+Q: How did you implement CSRF protection?
+Answer: "For the secure paths, I moved away from session cookies and implemented Header-based Bearer JWT authentication. Since browsers do not automatically attach custom authorization headers to cross-origin requests (unlike cookies), this naturally neutralizes CSRF attacks. In the vulnerable lab module, I demonstrated the CSRF exploit by showing how cookie-only endpoints without SameSite flags are vulnerable to cross-origin form submissions."
+Q: How do you ensure your database audit logs don't leak passwords?
+Answer: "I handled this at the database level rather than the application level. I wrote a PL/pgSQL trigger function process_dml_audit() that intercepts inserts, updates, and deletes. Within the trigger, the record is converted to a JSONB object, and the code checks for the presence of the password_hash key. If found, the key is removed using the JSONB subtraction operator (- 'password_hash') before writing to the audit log table."
